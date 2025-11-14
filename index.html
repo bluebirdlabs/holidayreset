@@ -84,7 +84,7 @@
                 Takes 5-7 minutes • 16 questions • Instant personalised results
             </p>
         </div>
-               
+        
         <button
             id="start-assessment"
             class="px-6 sm:px-8 py-3 text-white font-bold text-base sm:text-lg rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 w-full sm:w-auto gradient-button"
@@ -153,8 +153,14 @@
             Your Holiday Reset Check-In Results
         </h2>
         
-        <div id="email-sent-confirmation" class="hidden bg-green-50 p-4 rounded-xl shadow-sm border border-green-200 mb-6">
-            <p class="text-green-800 font-medium">✓ Hi <span id="results-name"></span>! Your detailed results have been sent to <span id="results-email"></span></p>
+        <!-- Add prominent CTA button to Wix thank you page -->
+        <div class="mb-6">
+            <a
+                href="https://www.bluebirdlabs.co/thank-you-assessment"
+                class="px-8 py-4 text-white font-bold text-lg rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 inline-block gradient-button"
+            >
+                ✨ Continue to Next Steps & Download Your Blueprint →
+            </a>
         </div>
         
         <p class="text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed" style="color: #2c5f7a;">
@@ -427,28 +433,15 @@ const questionsData = [
 ];
 
 // Configuration
-const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; // Replace with actual URL
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; // Not needed for Wix integration
 
 // State variables
 let currentQuestionIndex = 0;
 let answers = {};
-let userEmail = '';
-let userFirstName = '';
 let startTime;
 
 // Initialize app
 function initializeApp() {
-    // Email submission
-    document.getElementById('email-submit').addEventListener('click', captureEmail);
-    
-    // Allow Enter key in email fields
-    document.getElementById('first-name-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') captureEmail();
-    });
-    document.getElementById('email-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') captureEmail();
-    });
-    
     // Start assessment
     document.getElementById('start-assessment').addEventListener('click', startAssessment);
     
@@ -458,29 +451,6 @@ function initializeApp() {
     
     // Download blueprint
     document.getElementById('download-blueprint-btn').addEventListener('click', trackDownloadClick);
-}
-
-// Capture email
-function captureEmail() {
-    const firstNameInput = document.getElementById('first-name-input');
-    const emailInput = document.getElementById('email-input');
-    const firstName = firstNameInput.value.trim();
-    const email = emailInput.value.trim();
-    
-    // Basic validation
-    if (!firstName || !email || !email.includes('@')) {
-        alert('Please enter your first name and a valid email address.');
-        return;
-    }
-    
-    userFirstName = firstName;
-    userEmail = email;
-    
-    // Hide email capture, show confirmation
-    document.getElementById('email-capture').classList.add('hidden');
-    document.getElementById('email-confirmed').classList.remove('hidden');
-    document.getElementById('confirmed-name').textContent = firstName;
-    document.getElementById('confirmed-email').textContent = email;
 }
 
 // Start assessment
@@ -647,16 +617,6 @@ function showResults() {
     
     // Generate insights
     generateInsights(scores);
-    
-    // Show email confirmation if provided
-    if (userEmail && userFirstName) {
-        document.getElementById('email-sent-confirmation').classList.remove('hidden');
-        document.getElementById('results-name').textContent = userFirstName;
-        document.getElementById('results-email').textContent = userEmail;
-        
-        // Send data to Google Apps Script
-        sendDataToGoogleScript(scores, totalScore);
-    }
 }
 
 // Get status based on score
@@ -764,51 +724,9 @@ function trackDownloadClick(e) {
     alert('Thank you! Your Holiday Recovery Blueprint will be emailed to you along with your results.');
 }
 
-// Send data to Google Apps Script
-async function sendDataToGoogleScript(scores, totalScore) {
-    // Check if Google Script URL is configured
-    if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-        console.log('Google Apps Script URL not configured yet');
-        return;
-    }
-    
-    const endTime = new Date();
-    const timeToComplete = Math.round((endTime - startTime) / 1000);
-    
-    const data = {
-        firstName: userFirstName,
-        email: userEmail,
-        timestamp: new Date().toISOString(),
-        scores: scores,
-        totalScore: totalScore,
-        answers: answers,
-        timeToComplete: timeToComplete
-    };
-    
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        if (response.ok) {
-            console.log('Data sent successfully to Google Sheets');
-        } else {
-            console.error('Failed to send data to Google Sheets');
-        }
-    } catch (error) {
-        console.error('Error sending data to Google Sheets:', error);
-    }
-}
-
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
 
 </body>
-
 </html>
-
