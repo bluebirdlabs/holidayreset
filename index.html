@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Reset Check-In | Bluebird Labs & Mind Cultivation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #faf8f5 0%, #f4e4d7 100%);
+        }
+        .battery-display {
+            position: relative;
+            width: 48px;
+            height: 96px;
+            border: 2px solid #2c5f7a;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .battery-cap {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 8px;
+            background-color: #2c5f7a;
+            border-radius: 2px;
+        }
+        .battery-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-radius: 2px;
+            transition: all 0.5s ease-out;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .form-radio:checked {
+            background-color: #03989e;
+            border-color: #03989e;
+        }
+        .gradient-button {
+            background: linear-gradient(135deg, #03989e 0%, #d4a574 100%);
+        }
+        .gradient-button:hover {
+            background: linear-gradient(135deg, #027a7f 0%, #b87333 100%);
+        }
+        .holiday-glow {
+            box-shadow: 0 4px 20px rgba(212, 165, 116, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Introduction Screen -->
+<div id="intro-screen" class="flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl holiday-glow max-w-2xl w-full text-center">
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-4 sm:mb-6" style="color: #2c5f7a;">
+            Holiday Reset Check-In
+        </h1>
+        <p class="text-base sm:text-lg mb-2" style="color: #2c5f7a;">
+            The Art and Science of Personal Energy Management
+        </p>
+        <p class="text-sm sm:text-base mb-6" style="color: #b87333;">
+            A collaboration by Bluebird Labs & Mind Cultivation
+        </p>
+        
+        <div class="bg-gradient-to-r from-cyan-50 to-orange-50 p-6 rounded-xl mb-6 text-left">
+            <p class="text-base sm:text-lg mb-4 leading-relaxed" style="color: #2c5f7a;">
+                Are you heading into the holidays already exhausted?
+            </p>
+            <p class="text-sm sm:text-base mb-4 leading-relaxed" style="color: #2c5f7a;">
+                Most high-performers don't know how to actually rest. This quick check-in helps you understand your current energy across four vital dimensions: <strong>Physical, Emotional, Mental, and Spiritual</strong>.
+            </p>
+            <p class="text-sm sm:text-base mb-4 leading-relaxed" style="color: #2c5f7a;">
+                Research shows 60-70% of leaders operate in "survival mode" daily. The holidays are your chance to break that cycle - if you know where to start.
+            </p>
+            <p class="text-sm italic" style="color: #b87333;">
+                Takes 5-7 minutes • 16 questions • Instant personalised results
+            </p>
+        </div>
+        
+        <button
+            id="start-assessment"
+            onclick="startAssessment()"
+            class="px-6 sm:px-8 py-3 text-white font-bold text-base sm:text-lg rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 w-full sm:w-auto gradient-button"
+        >
+            Start Check-In
+        </button>
+        
+        <div class="mt-6 sm:mt-8 text-center">
+            <p class="text-sm" style="color: #2c5f7a;">
+                Learn more at
+                <a 
+                    href="https://www.bluebirdlabs.co" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="font-medium underline"
+                    style="color: #03989e; hover:color: #027a7f;"
+                >
+                    www.bluebirdlabs.co
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz Screen -->
+<div id="quiz-screen" class="hidden flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl holiday-glow max-w-2xl w-full">
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+            <div id="progress-bar" class="h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%; background: linear-gradient(90deg, #03989e 0%, #d4a574 100%);"></div>
+        </div>
+        <p id="question-counter" class="text-sm mb-2 text-right" style="color: #b87333;">Question 1 of 16</p>
+        <h2 id="question-text" class="text-xl sm:text-2xl font-semibold mb-4" style="color: #2c5f7a;"></h2>
+        <p id="question-dimension" class="text-base font-medium mb-6" style="color: #03989e;"></p>
+
+        <div id="answer-options" class="space-y-4 mb-6">
+            <!-- Answer options will be populated here -->
+        </div>
+
+        <div id="error-message" class="hidden text-red-500 text-sm mb-4">
+            Please select an answer before proceeding.
+        </div>
+
+        <div class="flex justify-between mt-6">
+            <button
+                id="previous-btn"
+                class="px-6 py-2 rounded-xl text-base sm:text-lg font-semibold transition duration-300 bg-gray-300 text-gray-600 cursor-not-allowed"
+                disabled
+            >
+                Previous
+            </button>
+            <button
+                id="next-btn"
+                class="px-6 py-2 text-white text-base sm:text-lg font-semibold rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4"
+                style="background-color: #03989e; hover:background-color: #027a7f; focus:ring-color: #03989e;"
+            >
+                Next
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Results Screen -->
+<div id="results-screen" class="hidden flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl holiday-glow max-w-4xl w-full text-center">
+        <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 sm:mb-6" style="color: #2c5f7a;">
+            Your Holiday Reset Check-In Results
+        </h2>
+        
+        <!-- Add prominent CTA button to Wix thank you page -->
+        <div class="mb-6">
+            <a
+                href="https://www.bluebirdlabs.co/thank-you-assessment"
+                class="px-8 py-4 text-white font-bold text-lg rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 inline-block gradient-button"
+            >
+                ✨ Continue to Next Steps & Download Your Blueprint →
+            </a>
+        </div>
+        
+        <p class="text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed" style="color: #2c5f7a;">
+            Here's your energy snapshot heading into the holiday season
+        </p>
+
+        <div id="energy-results" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <!-- Energy dimension results will be populated here -->
+        </div>
+
+        <div class="bg-gradient-to-r from-cyan-50 to-orange-50 p-4 sm:p-6 rounded-xl shadow-md mb-6 sm:mb-8">
+            <h3 class="text-xl sm:text-2xl font-bold mb-3" style="color: #2c5f7a;">Overall Assessment</h3>
+            <p id="overall-assessment" class="text-base sm:text-lg leading-relaxed" style="color: #2c5f7a;"></p>
+        </div>
+
+        <div class="bg-white border-2 p-4 sm:p-6 rounded-xl shadow-md mb-6 sm:mb-8" style="border-color: #d4a574;">
+            <p class="text-base sm:text-lg mb-4 leading-relaxed" style="color: #2c5f7a;">
+                Ready to learn how to <strong>actually rest</strong> this holiday season and return recharged in 2026?
+            </p>
+            <p class="text-sm sm:text-base mb-4" style="color: #2c5f7a;">
+                Join Cherry Ward and Rebecca Niebler for our two-part workshop series: <strong>The Holiday Energy Reset</strong>
+            </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <a
+                href="https://chapters.culturefirst.com/events/details/culture-amp-brisbane-presents-the-holiday-energy-reset-two-part-series-part-1-the-art-of-resting/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-6 sm:px-8 py-3 text-white font-bold text-base sm:text-lg rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 w-full sm:w-auto inline-block text-center gradient-button"
+            >
+                🎯 Register for Part 1: The Art of Resting
+            </a>
+
+            <a
+                href="#"
+                id="download-blueprint-btn"
+                class="px-6 sm:px-8 py-3 font-bold text-base sm:text-lg rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 w-full sm:w-auto inline-block text-center"
+                style="background-color: #d4a574; color: white; hover:background-color: #b87333;"
+            >
+                📥 Download Holiday Recovery Blueprint
+            </a>
+            
+            <a
+                href="https://events.humanitix.com/beyondburnout"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-6 sm:px-8 py-3 font-bold text-base sm:text-lg rounded-xl shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 w-full sm:w-auto inline-block text-center"
+                style="background-color: #2c5f7a; color: white; hover:background-color: #1a3a47;"
+            >
+                ✨ Learn About Lead Beyond Burnout
+            </a>
+        </div>
+
+        <div id="insights-section" class="bg-gradient-to-r from-cyan-50 to-orange-50 p-4 sm:p-6 rounded-xl shadow-md mb-6 text-left">
+            <h3 class="text-xl sm:text-2xl font-bold mb-4" style="color: #2c5f7a;">Your Holiday Energy Insights:</h3>
+            <div id="insights-content" class="text-sm sm:text-base" style="color: #2c5f7a;"></div>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <div class="flex justify-center items-center gap-4 mb-4">
+                <p class="text-sm" style="color: #2c5f7a;">A collaboration by</p>
+            </div>
+            <p class="text-sm" style="color: #2c5f7a;">
+                Bluebird Labs & Mind Cultivation
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Questions data - 16 positively-geared questions
+const questionsData = [
+    // Physical Energy (4 questions)
+    {
+        id: 'p1',
+        dimension: 'Physical Energy',
+        question: 'I get at least 7-8 hours of quality sleep and wake up feeling refreshed and energised.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'p2',
+        dimension: 'Physical Energy',
+        question: 'I maintain regular physical activity that leaves me feeling energised rather than depleted.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'p3',
+        dimension: 'Physical Energy',
+        question: 'I eat nutritious meals regularly and stay well-hydrated throughout the day.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'p4',
+        dimension: 'Physical Energy',
+        question: 'I take regular breaks during work to move, stretch, or rest my eyes.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    // Emotional Energy (4 questions)
+    {
+        id: 'e1',
+        dimension: 'Emotional Energy',
+        question: 'I feel emotionally balanced and able to handle challenges without becoming overwhelmed.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'e2',
+        dimension: 'Emotional Energy',
+        question: 'I have strong, supportive relationships that energise rather than drain me.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'e3',
+        dimension: 'Emotional Energy',
+        question: 'I regularly engage in activities that bring me joy and help me recharge emotionally.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'e4',
+        dimension: 'Emotional Energy',
+        question: 'I feel comfortable expressing my emotions and asking for support when I need it.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    // Mental Energy (4 questions)
+    {
+        id: 'm1',
+        dimension: 'Mental Energy',
+        question: 'I can focus deeply on tasks without constant distraction or mental fog.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'm2',
+        dimension: 'Mental Energy',
+        question: 'I take time away from screens and digital devices to let my mind rest.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'm3',
+        dimension: 'Mental Energy',
+        question: 'I engage in activities that challenge and stimulate my mind in positive ways.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 'm4',
+        dimension: 'Mental Energy',
+        question: 'I have effective strategies for managing stress and mental overwhelm.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    // Spiritual Energy (4 questions)
+    {
+        id: 's1',
+        dimension: 'Spiritual Energy',
+        question: 'I feel connected to a sense of purpose that gives my work and life meaning.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 's2',
+        dimension: 'Spiritual Energy',
+        question: 'I regularly take time for reflection, meditation, or practices that ground me.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 's3',
+        dimension: 'Spiritual Energy',
+        question: 'My values are aligned with how I spend my time and energy.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    },
+    {
+        id: 's4',
+        dimension: 'Spiritual Energy',
+        question: 'I feel a sense of gratitude and appreciation for my life and relationships.',
+        options: [
+            { text: 'Strongly Agree', value: 5 },
+            { text: 'Agree', value: 4 },
+            { text: 'Neutral', value: 3 },
+            { text: 'Disagree', value: 2 },
+            { text: 'Strongly Disagree', value: 1 }
+        ]
+    }
+];
+
+// Configuration
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; // Not needed for Wix integration
+
+// State variables
+let currentQuestionIndex = 0;
+let answers = {};
+let startTime;
+
+// Initialize app
+function initializeApp() {
+    console.log('App initialized');
+    
+    // Start assessment
+    const startButton = document.getElementById('start-assessment');
+    if (startButton) {
+        console.log('Start button found');
+        startButton.addEventListener('click', startAssessment);
+    } else {
+        console.error('Start button not found!');
+    }
+    
+    // Navigation buttons
+    document.getElementById('previous-btn').addEventListener('click', previousQuestion);
+    document.getElementById('next-btn').addEventListener('click', nextQuestion);
+    
+    // Download blueprint
+    document.getElementById('download-blueprint-btn').addEventListener('click', trackDownloadClick);
+}
+
+// Start assessment
+function startAssessment() {
+    console.log('Start assessment clicked');
+    document.getElementById('intro-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.remove('hidden');
+    currentQuestionIndex = 0;
+    startTime = new Date();
+    displayQuestion();
+}
+
+// Display current question
+function displayQuestion() {
+    const question = questionsData[currentQuestionIndex];
+    const progress = ((currentQuestionIndex + 1) / questionsData.length) * 100;
+    
+    document.getElementById('progress-bar').style.width = progress + '%';
+    document.getElementById('question-counter').textContent = `Question ${currentQuestionIndex + 1} of ${questionsData.length}`;
+    document.getElementById('question-text').textContent = question.question;
+    document.getElementById('question-dimension').textContent = `${question.dimension}`;
+    
+    // Create answer options
+    const optionsContainer = document.getElementById('answer-options');
+    optionsContainer.innerHTML = '';
+    
+    question.options.forEach(option => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = `flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 bg-gray-50 hover:bg-gray-100 border border-gray-200`;
+        optionDiv.innerHTML = `
+            <input type="radio" name="current-question" value="${option.value}" class="form-radio h-5 w-5 focus:ring-2" style="color: #03989e; focus:ring-color: #03989e;">
+            <span class="ml-3 text-base sm:text-lg" style="color: #2c5f7a;">${option.text}</span>
+        `;
+        
+        optionDiv.addEventListener('click', () => {
+            const radio = optionDiv.querySelector('input[type="radio"]');
+            radio.checked = true;
+            selectAnswer(question.id, option.value);
+            
+            // Update visual selection
+            document.querySelectorAll('#answer-options > div').forEach(div => {
+                div.className = 'flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 bg-gray-50 hover:bg-gray-100 border border-gray-200';
+            });
+            optionDiv.className = 'flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 border-2 shadow-md';
+            optionDiv.style.backgroundColor = '#e0f7f7';
+            optionDiv.style.borderColor = '#03989e';
+        });
+        
+        optionsContainer.appendChild(optionDiv);
+    });
+    
+    // Update navigation buttons
+    const prevBtn = document.getElementById('previous-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    if (currentQuestionIndex === 0) {
+        prevBtn.disabled = true;
+        prevBtn.className = 'px-6 py-2 rounded-xl text-base sm:text-lg font-semibold transition duration-300 bg-gray-300 text-gray-600 cursor-not-allowed';
+    } else {
+        prevBtn.disabled = false;
+        prevBtn.className = 'px-6 py-2 rounded-xl text-base sm:text-lg font-semibold transition duration-300 shadow-md';
+        prevBtn.style.backgroundColor = '#d4a574';
+        prevBtn.style.color = 'white';
+    }
+    
+    if (currentQuestionIndex === questionsData.length - 1) {
+        nextBtn.textContent = 'See My Results';
+    } else {
+        nextBtn.textContent = 'Next';
+    }
+    
+    // Pre-select if answer exists
+    if (answers[question.id]) {
+        const selectedOption = document.querySelector(`input[value="${answers[question.id]}"]`);
+        if (selectedOption) {
+            selectedOption.checked = true;
+            const parentDiv = selectedOption.closest('div');
+            parentDiv.className = 'flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 border-2 shadow-md';
+            parentDiv.style.backgroundColor = '#e0f7f7';
+            parentDiv.style.borderColor = '#03989e';
+        }
+    }
+}
+
+// Select answer
+function selectAnswer(questionId, value) {
+    answers[questionId] = value;
+    document.getElementById('error-message').classList.add('hidden');
+}
+
+// Previous question
+function previousQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        displayQuestion();
+    }
+}
+
+// Next question
+function nextQuestion() {
+    const currentQuestion = questionsData[currentQuestionIndex];
+    
+    if (!answers[currentQuestion.id]) {
+        document.getElementById('error-message').classList.remove('hidden');
+        return;
+    }
+    
+    if (currentQuestionIndex < questionsData.length - 1) {
+        currentQuestionIndex++;
+        displayQuestion();
+    } else {
+        showResults();
+    }
+}
+
+// Show results
+function showResults() {
+    // Calculate scores
+    const scores = {
+        'Physical Energy': 0,
+        'Emotional Energy': 0,
+        'Mental Energy': 0,
+        'Spiritual Energy': 0
+    };
+    
+    questionsData.forEach(question => {
+        const answer = answers[question.id];
+        if (answer) {
+            scores[question.dimension] += parseInt(answer);
+        }
+    });
+    
+    const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+    
+    // Hide quiz screen, show results screen
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('results-screen').classList.remove('hidden');
+    
+    // Display results
+    const resultsContainer = document.getElementById('energy-results');
+    resultsContainer.innerHTML = '';
+    
+    Object.entries(scores).forEach(([dimension, score]) => {
+        const percentage = (score / 20) * 100;
+        const status = getStatus(score);
+        
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'bg-white p-4 rounded-xl shadow-md border-2';
+        resultDiv.style.borderColor = getBorderColor(score);
+        resultDiv.innerHTML = `
+            <h3 class="text-base sm:text-lg font-semibold mb-3" style="color: #2c5f7a;">${dimension}</h3>
+            <div class="battery-display">
+                <div class="battery-cap"></div>
+                <div class="battery-fill" style="height: ${percentage}%; background-color: ${getBatteryColor(score)};"></div>
+            </div>
+            <p class="text-sm mt-3" style="color: #b87333;">${score}/20 points</p>
+            <p class="text-sm sm:text-base mt-2 text-center font-semibold" style="color: #2c5f7a;">${status}</p>
+            <p class="text-sm sm:text-base mt-2 text-center" style="color: #2c5f7a;">${getHolidayMessage(dimension, score)}</p>
+        `;
+        resultsContainer.appendChild(resultDiv);
+    });
+    
+    // Overall assessment
+    document.getElementById('overall-assessment').textContent = getOverallAssessment(totalScore);
+    
+    // Generate insights
+    generateInsights(scores);
+}
+
+// Get status based on score
+function getStatus(score) {
+    if (score >= 17) return "ENERGISED ✨";
+    if (score >= 13) return "STEADY ✓";
+    if (score >= 9) return "DEPLETED ⚠️";
+    return "CRITICAL 🚨";
+}
+
+// Get battery color based on score
+function getBatteryColor(score) {
+    if (score >= 17) return '#03989e';  // Teal - Energised
+    if (score >= 13) return '#d4a574';  // Gold - Steady
+    if (score >= 9) return '#b87333';   // Copper - Depleted
+    return '#fbad08';                    // Orange - Critical
+}
+
+// Get border color based on score
+function getBorderColor(score) {
+    if (score >= 17) return '#03989e';
+    if (score >= 13) return '#d4a574';
+    if (score >= 9) return '#b87333';
+    return '#fbad08';
+}
+
+// Get holiday-specific message
+function getHolidayMessage(dimension, score) {
+    const messages = {
+        'Physical Energy': {
+            high: "Your physical energy is strong! Use the holidays to maintain these great habits.",
+            low: "Heading into the holidays already exhausted? You're not alone - 70% of leaders do."
+        },
+        'Emotional Energy': {
+            high: "You're emotionally resourced for holiday interactions - well done!",
+            low: "Holiday family dynamics can drain emotional energy. We'll show you how to protect yours."
+        },
+        'Mental Energy': {
+            high: "Your mind is clear - perfect for strategic reflection during the break.",
+            low: "Entering the holidays mentally foggy? It's time to unplug and reset."
+        },
+        'Spiritual Energy': {
+            high: "Your sense of purpose is strong heading into this reflective season.",
+            low: "The holidays are a natural time to reconnect with what matters most."
+        }
+    };
+    
+    return score >= 13 ? messages[dimension].high : messages[dimension].low;
+}
+
+// Get overall assessment
+function getOverallAssessment(totalScore) {
+    if (totalScore >= 65) {
+        return "You're heading into the holidays with good energy reserves! Keep this momentum - register for Part 1 to learn how to maintain it through the season.";
+    }
+    if (totalScore >= 49) {
+        return "You're managing, but the holidays could help you refuel. Don't let the holidays drain you further - join us to learn The Art of Resting.";
+    }
+    if (totalScore >= 33) {
+        return "You're running on fumes heading into the holidays. Research shows this is exactly when rest is hardest - but most needed. This workshop series is made for you.";
+    }
+    return "You need this holiday break - urgently. Register for both workshops and explore our Lead Beyond Burnout intensive for comprehensive support.";
+}
+
+// Generate personalized insights
+function generateInsights(scores) {
+    const insightsContainer = document.getElementById('insights-content');
+    let insights = '<ul style="list-style-type: disc; padding-left: 20px; space-y: 2;">';
+    
+    // Physical Energy insights
+    if (scores['Physical Energy'] < 13) {
+        insights += '<li class="mb-3"><strong>Physical Energy:</strong> Learn the 4 Types of Rest in Workshop 1. Quick win: Schedule sleep like you schedule meetings.</li>';
+    }
+    
+    // Emotional Energy insights
+    if (scores['Emotional Energy'] < 13) {
+        insights += '<li class="mb-3"><strong>Emotional Energy:</strong> Setting boundaries with family isn\'t selfish - it\'s essential. We\'ll show you how in Workshop 1.</li>';
+    }
+    
+    // Mental Energy insights
+    if (scores['Mental Energy'] < 13) {
+        insights += '<li class="mb-3"><strong>Mental Energy:</strong> Your brain needs to unplug - literally. Workshop 1 covers digital boundaries for true rest.</li>';
+    }
+    
+    // Spiritual Energy insights
+    if (scores['Spiritual Energy'] < 13) {
+        insights += '<li class="mb-3"><strong>Spiritual Energy:</strong> The holidays are meant for reflection. Workshop 2 helps you reconnect with what matters most.</li>';
+    }
+    
+    // If all scores are good
+    if (Object.values(scores).every(score => score >= 13)) {
+        insights += '<li class="mb-3">Your energy levels are strong across all dimensions! Join our workshops to learn how to maintain this through the busy holiday season and into 2026.</li>';
+    }
+    
+    insights += '</ul>';
+    insights += '<p class="mt-6 text-sm"><strong>Next Steps:</strong> Register for The Holiday Energy Reset workshop series to get personalised strategies for your unique energy profile.</p>';
+    
+    insightsContainer.innerHTML = insights;
+}
+
+// Track download click
+function trackDownloadClick(e) {
+    e.preventDefault();
+    // In production, you would trigger an actual download here
+    alert('Thank you! Your Holiday Recovery Blueprint will be emailed to you along with your results.');
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializeApp);
+</script>
+
+</body>
+</html>
